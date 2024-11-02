@@ -1,8 +1,8 @@
-import numpy as np
-import matplotlib.pyplot as plt
-import torch
-
 from typing import List
+
+import matplotlib.pyplot as plt
+import numpy as np
+import torch
 
 
 class PlotErrorSurfaces:
