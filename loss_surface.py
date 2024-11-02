@@ -1,9 +1,7 @@
-from typing import List
-
-import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.pyplot as plt
 import torch
-
+from typing import List
 
 class PlotErrorSurfaces:
     
@@ -16,7 +14,7 @@ class PlotErrorSurfaces:
         n_samples: int = 30, 
         plot_initial: bool = True
     ):
-        self.x: np.ndarray = X.numpy()  # Converted to NumPy array for compatibility with NumPy operations
+        self.x: np.ndarray = X.numpy()
         self.y: np.ndarray = Y.numpy()
         self.w, self.b = np.meshgrid(
             np.linspace(-w_range, w_range, n_samples),
@@ -29,8 +27,7 @@ class PlotErrorSurfaces:
         self.iteration: int = 0
 
         if plot_initial:
-            self.plot_surface()
-            self.plot_contour()
+            self.plot_side_by_side()
 
     def sigmoid(self, z: np.ndarray) -> np.ndarray:
         return 1 / (1 + np.exp(-z))
@@ -47,39 +44,47 @@ class PlotErrorSurfaces:
         self.B.append(model.linear.bias.item())
         self.LOSS.append(loss)
 
-    def plot_surface(self) -> None:
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
-        ax.plot_surface(self.w, self.b, self.Z, cmap='viridis')
-        ax.set_title('Loss Surface')
-        ax.set_xlabel('Weight (w)')
-        ax.set_ylabel('Bias (b)')
-        plt.show()
+    def plot_side_by_side(self) -> None:
+        fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 
-    def plot_contour(self) -> None:
-        plt.contour(self.w, self.b, self.Z)
-        plt.xlabel('Weight (w)')
-        plt.ylabel('Bias (b)')
-        plt.title('Loss Surface Contour')
+        # 3D Surface Plot
+        ax3d = fig.add_subplot(1, 2, 1, projection='3d')
+        ax3d.plot_surface(self.w, self.b, self.Z, cmap='viridis')
+        ax3d.set_title('Loss Surface')
+        ax3d.set_xlabel('Weight (w)')
+        ax3d.set_ylabel('Bias (b)')
+        
+        # 2D Contour Plot
+        axes[1].contour(self.w, self.b, self.Z)
+        axes[1].set_title('Loss Surface Contour')
+        axes[1].set_xlabel('Weight (w)')
+        axes[1].set_ylabel('Bias (b)')
+
+        # Remove the outer frame (spines) of the 2D contour plot as well
+        axes[0].tick_params(left=False, labelleft=False, bottom=False, labelbottom=False)
+        for spine in axes[0].spines.values():
+            spine.set_visible(False)
+
+        plt.tight_layout()
         plt.show()
 
     def final_plot(self) -> None:
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
-        ax.plot_wireframe(self.w, self.b, self.Z, color='gray')
-        ax.scatter(self.W, self.B, self.LOSS, c='r', marker='x')
-        plt.show()
+        fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 
-        plt.contour(self.w, self.b, self.Z)
-        plt.scatter(self.W, self.B, c='r', marker='x')
-        plt.xlabel('Weight (w)')
-        plt.ylabel('Bias (b)')
-        plt.title('Training Path on Loss Surface')
-        plt.show()
+        # 3D Wireframe Plot with Training Path
+        ax3d = fig.add_subplot(1, 2, 1, projection='3d')
+        ax3d.plot_wireframe(self.w, self.b, self.Z, color='gray')
+        ax3d.scatter(self.W, self.B, self.LOSS, c='r', marker='x')
+        ax3d.set_title('Training Path on Loss Surface')
+        ax3d.set_xlabel('Weight (w)')
+        ax3d.set_ylabel('Bias (b)')
 
-# Auxiliary plotting function
-def plot_progress(X: torch.Tensor, Y: torch.Tensor, model: torch.nn.Module, epoch: int) -> None:
-    plt.plot(X.numpy(), model(X).detach().numpy(), label=f'Epoch {epoch}')
-    plt.plot(X.numpy(), Y.numpy(), 'r', label='True Data')
-    plt.legend()
-    plt.show()
+        # 2D Contour Plot with Training Path
+        axes[1].contour(self.w, self.b, self.Z)
+        axes[1].scatter(self.W, self.B, c='r', marker='x')
+        axes[1].set_title('Training Path on Contour')
+        axes[1].set_xlabel('Weight (w)')
+        axes[1].set_ylabel('Bias (b)')
+
+        plt.tight_layout()
+        plt.show()
