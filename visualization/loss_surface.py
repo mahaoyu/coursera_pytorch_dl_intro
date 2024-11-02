@@ -68,12 +68,34 @@ class PlotErrorSurfaces:
         plt.tight_layout()
         plt.show()
 
+    def plot_update(self):
+        plt.subplot(121)
+        plt.ylim
+        plt.plot(self.x, self.y, 'ro', label="training points")
+        plt.plot(self.x, self.W[-1] * self.x + self.B[-1], label="estimated line")
+        plt.plot(self.x, self.sigmoid(self.W[-1] * self.x + self.B[-1]), label="sigmoid")
+        plt.xlabel('x')
+        plt.ylabel('y')
+        plt.ylim((-0.1, 2))
+        plt.legend()
+        plt.title(f'Data space iteration: {self.iteration}')
+        
+        plt.subplot(122)
+        plt.contour(self.w, self.b, self.Z)
+        plt.scatter(self.W, self.B, c='r', marker='x')
+        plt.title(f'Loss surface contour iteration {self.iteration}')
+        plt.xlabel('w')
+        plt.ylabel('b')
+
+        plt.show()
+
     def final_plot(self) -> None:
         fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 
         # 3D Wireframe Plot with Training Path
         ax3d = fig.add_subplot(1, 2, 1, projection='3d')
         ax3d.plot_wireframe(self.w, self.b, self.Z, color='gray')
+        ax3d.plot_surface(self.w, self.b, self.Z, cmap='viridis', alpha=0.5)
         ax3d.scatter(self.W, self.B, self.LOSS, c='r', marker='x')
         ax3d.set_title('Training Path on Loss Surface')
         ax3d.set_xlabel('Weight (w)')
@@ -85,6 +107,11 @@ class PlotErrorSurfaces:
         axes[1].set_title('Training Path on Contour')
         axes[1].set_xlabel('Weight (w)')
         axes[1].set_ylabel('Bias (b)')
+
+        # Remove the outer frame (spines) of the 2D contour plot as well
+        axes[0].tick_params(left=False, labelleft=False, bottom=False, labelbottom=False)
+        for spine in axes[0].spines.values():
+            spine.set_visible(False)
 
         plt.tight_layout()
         plt.show()
